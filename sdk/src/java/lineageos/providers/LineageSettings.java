@@ -261,7 +261,7 @@ public final class LineageSettings {
                 long newValuesVersion = SystemProperties.getLong(mVersionSystemProperty, 0);
 
                 // Our own user's settings data uses a client-side cache
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     if (mValuesVersion != newValuesVersion) {
                         if (LOCAL_LOGV || false) {
                             Log.v(TAG, "invalidate [" + mUri.getLastPathSegment() + "]: current "
@@ -270,9 +270,7 @@ public final class LineageSettings {
 
                         mValues.clear();
                         mValuesVersion = newValuesVersion;
-                    }
-
-                    if (mValues.containsKey(name)) {
+                    } else if (mValues.containsKey(name)) {
                         return mValues.get(name);  // Could be null, that's OK -- negative caching
                     }
                 }
@@ -300,7 +298,7 @@ public final class LineageSettings {
                         String value = b.getPairValue();
                         // Don't update our cache for reads of other users' data
                         if (isSelf) {
-                            synchronized (this) {
+                            synchronized (NameValueCache.this) {
                                 mValues.put(name, value);
                             }
                         } else {
@@ -330,7 +328,7 @@ public final class LineageSettings {
                 }
 
                 String value = c.moveToNext() ? c.getString(0) : null;
-                synchronized (this) {
+                synchronized (NameValueCache.this) {
                     mValues.put(name, value);
                 }
                 if (LOCAL_LOGV) {
@@ -569,7 +567,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /**
@@ -580,7 +578,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name, String def) {
-            String str = getStringForUser(resolver, name, UserHandle.myUserId());
+            String str = getStringForUser(resolver, name, resolver.getUserId());
             return str == null ? def : str;
         }
 
@@ -603,7 +601,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putString(ContentResolver resolver, String name, String value) {
-            return putStringForUser(resolver, name, value, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
         /** @hide */
@@ -632,7 +630,7 @@ public final class LineageSettings {
          * or not a valid integer.
          */
         public static int getInt(ContentResolver cr, String name, int def) {
-            return getIntForUser(cr, name, def, UserHandle.myUserId());
+            return getIntForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -665,7 +663,7 @@ public final class LineageSettings {
          */
         public static int getInt(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getIntForUser(cr, name, UserHandle.myUserId());
+            return getIntForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -693,7 +691,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
-            return putIntForUser(cr, name, value, UserHandle.myUserId());
+            return putIntForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -717,7 +715,7 @@ public final class LineageSettings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            return getLongForUser(cr, name, def, UserHandle.myUserId());
+            return getLongForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -752,7 +750,7 @@ public final class LineageSettings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getLongForUser(cr, name, UserHandle.myUserId());
+            return getLongForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -780,7 +778,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putLong(ContentResolver cr, String name, long value) {
-            return putLongForUser(cr, name, value, UserHandle.myUserId());
+            return putLongForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -804,7 +802,7 @@ public final class LineageSettings {
          * or not a valid float.
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
-            return getFloatForUser(cr, name, def, UserHandle.myUserId());
+            return getFloatForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -838,7 +836,7 @@ public final class LineageSettings {
          */
         public static float getFloat(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getFloatForUser(cr, name, UserHandle.myUserId());
+            return getFloatForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -869,7 +867,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putFloat(ContentResolver cr, String name, float value) {
-            return putFloatForUser(cr, name, value, UserHandle.myUserId());
+            return putFloatForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2377,7 +2375,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /**
@@ -2388,7 +2386,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name, String def) {
-            String str = getStringForUser(resolver, name, UserHandle.myUserId());
+            String str = getStringForUser(resolver, name, resolver.getUserId());
             return str == null ? def : str;
         }
 
@@ -2411,7 +2409,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putString(ContentResolver resolver, String name, String value) {
-            return putStringForUser(resolver, name, value, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
         /** @hide */
@@ -2440,7 +2438,7 @@ public final class LineageSettings {
          * or not a valid integer.
          */
         public static int getInt(ContentResolver cr, String name, int def) {
-            return getIntForUser(cr, name, def, UserHandle.myUserId());
+            return getIntForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2473,7 +2471,7 @@ public final class LineageSettings {
          */
         public static int getInt(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getIntForUser(cr, name, UserHandle.myUserId());
+            return getIntForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2501,7 +2499,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
-            return putIntForUser(cr, name, value, UserHandle.myUserId());
+            return putIntForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2525,7 +2523,7 @@ public final class LineageSettings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            return getLongForUser(cr, name, def, UserHandle.myUserId());
+            return getLongForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2560,7 +2558,7 @@ public final class LineageSettings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getLongForUser(cr, name, UserHandle.myUserId());
+            return getLongForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2588,7 +2586,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putLong(ContentResolver cr, String name, long value) {
-            return putLongForUser(cr, name, value, UserHandle.myUserId());
+            return putLongForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2612,7 +2610,7 @@ public final class LineageSettings {
          * or not a valid float.
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
-            return getFloatForUser(cr, name, def, UserHandle.myUserId());
+            return getFloatForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2646,7 +2644,7 @@ public final class LineageSettings {
          */
         public static float getFloat(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getFloatForUser(cr, name, UserHandle.myUserId());
+            return getFloatForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2677,7 +2675,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putFloat(ContentResolver cr, String name, float value) {
-            return putFloatForUser(cr, name, value, UserHandle.myUserId());
+            return putFloatForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -3117,7 +3115,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /**
@@ -3128,7 +3126,7 @@ public final class LineageSettings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name, String def) {
-            String str = getStringForUser(resolver, name, UserHandle.myUserId());
+            String str = getStringForUser(resolver, name, resolver.getUserId());
             return str == null ? def : str;
         }
 
@@ -3146,7 +3144,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putString(ContentResolver resolver, String name, String value) {
-            return putStringForUser(resolver, name, value, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
         /** @hide */
@@ -3170,7 +3168,7 @@ public final class LineageSettings {
          * or not a valid integer.
          */
         public static int getInt(ContentResolver cr, String name, int def) {
-            return getIntForUser(cr, name, def, UserHandle.myUserId());
+            return getIntForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -3203,7 +3201,7 @@ public final class LineageSettings {
          */
         public static int getInt(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getIntForUser(cr, name, UserHandle.myUserId());
+            return getIntForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -3231,7 +3229,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
-            return putIntForUser(cr, name, value, UserHandle.myUserId());
+            return putIntForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -3255,7 +3253,7 @@ public final class LineageSettings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            return getLongForUser(cr, name, def, UserHandle.myUserId());
+            return getLongForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -3290,7 +3288,7 @@ public final class LineageSettings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getLongForUser(cr, name, UserHandle.myUserId());
+            return getLongForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -3318,7 +3316,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putLong(ContentResolver cr, String name, long value) {
-            return putLongForUser(cr, name, value, UserHandle.myUserId());
+            return putLongForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -3342,7 +3340,7 @@ public final class LineageSettings {
          * or not a valid float.
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
-            return getFloatForUser(cr, name, def, UserHandle.myUserId());
+            return getFloatForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -3376,7 +3374,7 @@ public final class LineageSettings {
          */
         public static float getFloat(ContentResolver cr, String name)
                 throws LineageSettingNotFoundException {
-            return getFloatForUser(cr, name, UserHandle.myUserId());
+            return getFloatForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -3407,7 +3405,7 @@ public final class LineageSettings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putFloat(ContentResolver cr, String name, float value) {
-            return putFloatForUser(cr, name, value, UserHandle.myUserId());
+            return putFloatForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
